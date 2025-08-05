@@ -39,13 +39,13 @@ export const Home = () => {
             muted
             loop
             playsInline
-            poster="/img/slide-03.jpg" // Fallback image while video loads
+            poster={`${process.env.PUBLIC_URL}/img/slide-03.jpg`} // Fallback image while video loads
           >
-            <source src="/videos/hero-video.mp4" type="video/mp4" />
-            <source src="/videos/hero-video.webm" type="video/webm" />
+            <source src={`${process.env.PUBLIC_URL}/videos/hero-video.mp4`} type="video/mp4" />
+            <source src={`${process.env.PUBLIC_URL}/videos/hero-video.webm`} type="video/webm" />
             {/* Fallback for browsers that don't support video */}
             <img
-              src="/img/slide-03.jpg"
+              src={`${process.env.PUBLIC_URL}/img/slide-03.jpg`}
               alt="Hero"
               className="w-full h-full object-cover opacity-40"
             />
@@ -183,7 +183,7 @@ export const Home = () => {
             <div className="relative group">
               <div className="absolute -inset-4 bg-gradient-to-r from-[#B8F200] to-[#2F3AE4] rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-300"></div>
               <img
-                src="/img/gallery-6.jpg" // Replace with your image
+                src={`${process.env.PUBLIC_URL}/img/gallery-6.jpg`} // Replace with your image
                 alt="Our Story"
                 className="relative w-full h-[500px] object-cover rounded-2xl shadow-2xl transform group-hover:scale-[1.05] transition duration-500"
               />
@@ -221,7 +221,7 @@ export const Home = () => {
               </p>
               <div className="flex items-center">
                 <img 
-                  src="/img/testimonial-1.jpg" 
+                  src={`${process.env.PUBLIC_URL}/img/testimonial-1.jpg`} 
                   alt="Alex K." 
                   className="w-12 h-12 rounded-full mr-4 object-cover"
                 />
@@ -242,7 +242,7 @@ export const Home = () => {
               </p>
               <div className="flex items-center">
                 <img 
-                  src="/img/testimonial-2.jpg" 
+                  src={`${process.env.PUBLIC_URL}/img/testimonial-2.jpg`} 
                   alt="Jamie L." 
                   className="w-12 h-12 rounded-full mr-4 object-cover"
                 />
@@ -263,7 +263,7 @@ export const Home = () => {
               </p>
               <div className="flex items-center">
                 <img 
-                  src="/img/testimonial-3.jpg" 
+                  src={`${process.env.PUBLIC_URL}/img/testimonial-3.jpg`} 
                   alt="Taylor R." 
                   className="w-12 h-12 rounded-full mr-4 object-cover"
                 />
@@ -291,7 +291,7 @@ export const Home = () => {
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-black/50"></div>
           <img 
-            src="/img/cta-background.jpg" 
+            src={`${process.env.PUBLIC_URL}/img/cta-background.jpg`} 
             alt="CTA Background"
             className="w-full h-full object-cover opacity-30"
             onError={(e) => {

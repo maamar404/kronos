@@ -41,7 +41,7 @@ export const Navbar = () => {
           <div className="flex justify-between h-16">
             <div className="flex items-center">
               <Link to="/" className="flex-shrink-0 flex items-center">
-                <img className="block h-8 w-auto" src="./img/logo1.png" alt="kronos" />
+                <img className="block h-8 w-auto" src={`${process.env.PUBLIC_URL}/img/logo1.png`} alt="kronos" />
               </Link>
             </div>
 

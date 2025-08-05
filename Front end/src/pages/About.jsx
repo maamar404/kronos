@@ -71,7 +71,7 @@ export const About = () => {
             <div className="relative group">
               <div className="absolute -inset-4 bg-gradient-to-r from-[#B8F200] to-[#2F3AE4] rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-300"></div>
               <img
-                src="/img/about-story.jpg" // Replace with your image
+                src={`${process.env.PUBLIC_URL}/img/about-story.jpg`} // Replace with your image
                 alt="Our Story"
                 className="relative w-full h-[500px] object-cover rounded-2xl shadow-2xl transform group-hover:scale-[1.02] transition duration-500"
               />
