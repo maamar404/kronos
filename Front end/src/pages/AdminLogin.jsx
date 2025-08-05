@@ -165,7 +165,7 @@ export const AdminLogin = () => {
         </form>
         
         <div className="mt-8 text-center">
-          <a href="/" className="text-[#b8f200] hover:text-[#b8f200]/80 text-sm font-medium transition-colors">
+          <a href="/kronos" className="text-[#b8f200] hover:text-[#b8f200]/80 text-sm font-medium transition-colors">
             Return to main site
           </a>
         </div>
