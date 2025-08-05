@@ -169,7 +169,7 @@ export const OrderHistory = () => {
           <p className="text-gray-400 mb-8 text-lg">Your order history will appear here once you make your first purchase</p>
           <button 
             className="bg-gradient-to-r from-[#2F3AE4] to-[#B8F200] text-black px-8 py-4 rounded-xl font-bold hover:shadow-xl hover:shadow-[#B8F200]/30 transition-all duration-300 transform hover:scale-105"
-            onClick={() => window.location.href = '/products'}
+            onClick={() => window.location.href = '/kronos/products'}
           >
             Start Shopping
           </button>
@@ -301,7 +301,7 @@ export const OrderHistory = () => {
         <div className="text-center mt-12 p-6 bg-gray-900/30 rounded-xl border border-gray-800">
           <p className="text-gray-400 mb-2">Need help with an order?</p>
           <button 
-          onClick={() => window.location.href = '/contact'}
+          onClick={() => window.location.href = '/kronos/contact'}
           className="text-[#B8F200] hover:text-[#2F3AE4] font-medium transition-colors">
             Contact Support
           </button>
