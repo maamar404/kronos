@@ -434,8 +434,8 @@ app.delete('/admin/users/:id', async (req, res) => {
           quantity: item.quantity,
         })),
         mode: 'payment',
-        success_url: 'https://mohamedmaamar.me/kronos/success',
-        cancel_url: 'https://mohamedmaamar.me/kronos/cancel',
+        success_url: 'https://mohamedmaamar.me/kronos/#/success',
+        cancel_url: 'https://mohamedmaamar.me/kronos/#/cancel',
         customer_email: customer.email,
         metadata: { ...customer },
       });
