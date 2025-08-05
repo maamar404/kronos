@@ -14,7 +14,8 @@ app.use(cors({
   origin: [
     'http://localhost:3000', 
     'https://mohamedmaamar.me',
-    'https://www.mohamedmaamar.me'
+    'https://www.mohamedmaamar.me',
+    'https://maamar404.github.io'  // Add GitHub Pages domain
   ]
 }));
 
