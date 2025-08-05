@@ -8,7 +8,7 @@ const InstagramFeed = () => {
   const instagramPosts = [
     {
       id: 1,
-      image: "/img/gallery-1.jpg",
+      image: `${process.env.PUBLIC_URL}/img/gallery-1.jpg`,
       likes: 2847,
       comments: 156,
       caption: "Street meets future in our latest drop 🔥 #StreetMeetsFuture #NewDrop",
@@ -16,7 +16,7 @@ const InstagramFeed = () => {
     },
     {
       id: 2,
-      image: "/img/gallery-2.jpg",
+      image: `${process.env.PUBLIC_URL}/img/gallery-2.jpg`,
       likes: 3921,
       comments: 203,
       caption: "Cyber punk vibes in the city 🌃 #CyberPunk #UrbanStyle",
@@ -24,7 +24,7 @@ const InstagramFeed = () => {
     },
     {
       id: 3,
-      image: "/img/gallery-3.jpg",
+      image: `${process.env.PUBLIC_URL}/img/gallery-3.jpg`,
       likes: 1562,
       comments: 89,
       caption: "Sustainability meets style ♻️ #SustainableFashion #EcoWear",
@@ -32,7 +32,7 @@ const InstagramFeed = () => {
     },
     {
       id: 4,
-      image: "/img/gallery-4.jpg",
+      image: `${process.env.PUBLIC_URL}/img/gallery-4.jpg`,
       likes: 4283,
       comments: 312,
       caption: "Future is now. Are you ready? ⚡ #FutureReady #Innovation",
@@ -40,7 +40,7 @@ const InstagramFeed = () => {
     },
     {
       id: 5,
-      image: "/img/gallery-5.jpg",
+      image: `${process.env.PUBLIC_URL}/img/gallery-5.jpg`,
       likes: 2156,
       comments: 134,
       caption: "Minimalist design, maximum impact 🎯 #MinimalistStyle #CleanLines",
@@ -48,7 +48,7 @@ const InstagramFeed = () => {
     },
     {
       id: 6,
-      image: "/img/gallery-6.jpg",
+      image: `${process.env.PUBLIC_URL}/img/gallery-6.jpg`,
       likes: 3789,
       comments: 267,
       caption: "Night runner collection drops tomorrow 🌙 #NightRunner #ComingSoon",
@@ -150,7 +150,7 @@ const InstagramFeed = () => {
               <div className="p-6">
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
-                    <img src='/img/kronos.png' alt="Avatar" className="w-full h-full" />
+                    <img src={`${process.env.PUBLIC_URL}/img/kronos.png`} alt="Avatar" className="w-full h-full" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-white font-semibold text-sm mb-1">@{post.username}</p>

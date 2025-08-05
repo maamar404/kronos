@@ -9,21 +9,21 @@ const InteractiveSection = () => {
       number: "01",
       title: "Accessories",
       description: "Chase trends not prices",
-      image: "/img/accessories-bg.jpg" // Replace with your actual image path
+      image: `${process.env.PUBLIC_URL}/img/accessories-bg.jpg`
     },
     {
       id: 2,
       number: "02", 
       title: "Streetwear",
       description: "Express your unique style",
-      image: "/img/streetwear-bg.jpg" // Replace with your actual image path
+      image: `${process.env.PUBLIC_URL}/img/streetwear-bg.jpg`
     },
     {
       id: 3,
       number: "03",
       title: "Future Tech",
       description: "Tomorrow's fashion today",
-      image: "/img/future-tech-bg.jpg" // Replace with your actual image path
+      image: `${process.env.PUBLIC_URL}/img/future-tech-bg.jpg`
     }
   ];
 

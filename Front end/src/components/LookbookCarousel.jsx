@@ -10,7 +10,7 @@ const LookbookCarousel = () => {
       id: 1,
       theme: "Urban Explorer",
       subtitle: "Street meets adventure",
-      image: "/img/slide-01.jpg",
+      image: `${process.env.PUBLIC_URL}/img/slide-01.jpg`,
       products: ["Tactical Jacket", "Cargo Pants", "Urban Boots"],
       color: "#B8F200"
     },
@@ -18,7 +18,7 @@ const LookbookCarousel = () => {
       id: 2,
       theme: "Cyber Punk",
       subtitle: "Digital rebellion",
-      image: "/img/slide-02.jpg",
+      image: `${process.env.PUBLIC_URL}/img/slide-02.jpg`,
       products: ["LED Hoodie", "Tech Pants", "Neon Sneakers"],
       color: "#2F3AE4"
     },
@@ -26,7 +26,7 @@ const LookbookCarousel = () => {
       id: 3,
       theme: "Future Minimalist",
       subtitle: "Clean lines, bold future",
-      image: "/img/slide-03.jpg",
+      image: `${process.env.PUBLIC_URL}/img/slide-03.jpg`,
       products: ["Minimal Tee", "Smart Jeans", "Future Slides"],
       color: "#B8F200"
     },
@@ -34,7 +34,7 @@ const LookbookCarousel = () => {
       id: 4,
       theme: "Night Runner",
       subtitle: "Built for the darkness",
-      image: "/img/slide-04.jpg",
+      image: `${process.env.PUBLIC_URL}/img/slide-04.jpg`,
       products: ["Reflective Jacket", "Night Joggers", "Glow Accessories"],
       color: "#2F3AE4"
     }
