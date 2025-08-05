@@ -224,7 +224,7 @@ export const About = () => {
               <div className="text-black/70">Items Sold</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-black">98%</div>
+              <div className="text-3xl font-bold text-black">95%</div>
               <div className="text-black/70">Customer Satisfaction</div>
             </div>
             <div className="text-center">
