@@ -12,6 +12,8 @@ export const Navbar = () => {
   const { user, setUser } = useContext(UserContext);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isFavoritesDrawerOpen, setIsFavoritesDrawerOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileUserMenuOpen, setIsMobileUserMenuOpen] = useState(false);
   const { favorites, toggleFavorite } = useContext(FavoritesContext);
   const navigate = useNavigate();
 
@@ -20,46 +22,70 @@ export const Navbar = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
+    setIsMobileMenuOpen(false);
+    setIsMobileUserMenuOpen(false);
   };
 
-  // Handle navigation and close drawer
+  // Handle navigation and close drawers
   const handleNavigateToCart = () => {
     setIsFavoritesDrawerOpen(false);
+    setIsMobileMenuOpen(false);
+    setIsMobileUserMenuOpen(false);
     navigate('/cart');
   };
 
   const handleNavigateToProducts = () => {
     setIsFavoritesDrawerOpen(false);
+    setIsMobileMenuOpen(false);
+    setIsMobileUserMenuOpen(false);
+    navigate('/products');
+  };
 
+  const handleMobileNavigation = (path) => {
+    setIsMobileMenuOpen(false);
+    setIsMobileUserMenuOpen(false);
+    navigate(path);
   };
 
   return (
     <>
-      {/* Your Original Navbar - Unchanged */}
       <nav className="bg-black shadow-md fixed w-full z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link to="/" className="flex-shrink-0 flex items-center">
+          <div className="flex justify-between items-center h-16">
+            
+            {/* Left side - Mobile Menu + Logo (responsive) */}
+            <div className="flex items-center space-x-3">
+              {/* Mobile Menu Button - shows below 1024px */}
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="lg:hidden p-2 rounded-md text-[#b8f200] hover:text-white hover:bg-gray-800 transition-colors"
+              >
+                <Menu className="h-6 w-6" />
+              </button>
+
+              {/* Logo - Hidden on very small screens (below 480px), visible on larger */}
+              <Link to="/" className="flex-shrink-0 flex items-center hidden min-[480px]:flex">
                 <img className="block h-8 w-auto" src={`${process.env.PUBLIC_URL}/img/logo1.png`} alt="kronos" />
               </Link>
             </div>
 
-            <div className="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-8">
-              <Link to="/" className="text-[#b8f200] hover:text-[#b8f200] px-3 py-2 rounded-md text-sm font-medium">
+            {/* Desktop Navigation - Shows above 1024px */}
+            <div className="hidden lg:flex lg:items-center lg:space-x-6">
+              <Link to="/" className="text-[#b8f200] hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
                 Home
               </Link>
-              <Link to="/products" className="text-[#b8f200] hover:text-[#b8f200] px-3 py-2 rounded-md text-sm font-medium">
+              <Link to="/products" className="text-[#b8f200] hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
                 Shop
               </Link>
-              <Link to="/about" className="text-[#b8f200] hover:text-[#b8f200] px-3 py-2 rounded-md text-sm font-medium">
+              <Link to="/about" className="text-[#b8f200] hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
                 About us
               </Link>
+              
               {/* Cart Icon */}
-              <Link to="/cart" className="relative text-[#b8f200] hover:text-[#b8f200] px-3 py-2">
+              <Link to="/cart" className="relative text-[#b8f200] hover:text-white px-3 py-2 transition-colors">
                 <ShoppingBag className="h-6 w-6" />
                 {cartProducts.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-[#b8f200] text-black text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 bg-[#b8f200] text-black text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
                     {cartProducts.length}
                   </span>
                 )}
@@ -68,20 +94,20 @@ export const Navbar = () => {
               {/* Heart Icon for Favorites */}
               <button
                 onClick={() => setIsFavoritesDrawerOpen(true)}
-                className="relative text-[#b8f200] hover:text-[#b8f200] px-3 py-2"
+                className="relative text-[#b8f200] hover:text-white px-3 py-2 transition-colors"
               >
                 <Heart className="h-6 w-6" />
                 {favorites.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-[#b8f200] text-black text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 bg-[#b8f200] text-black text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
                     {favorites.length}
                   </span>
                 )}
               </button>
 
-              {/* Conditional rendering for user login/logout */}
+              {/* User Section */}
               {user ? (
                 <div className="flex items-center space-x-4">
-                  <Link to="/orders" className="text-[#b8f200] hover:text-[#b8f200] px-3 py-2 rounded-md text-sm font-medium">
+                  <Link to="/orders" className="text-[#b8f200] hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
                     Order History
                   </Link>
                   <span className="text-[#b8f200] text-sm font-medium">
@@ -89,7 +115,7 @@ export const Navbar = () => {
                   </span>
                   <button
                     onClick={handleLogout}
-                    className="text-[#b8f200] hover:text-[#b8f200] px-3 py-2 rounded-md text-sm font-medium"
+                    className="text-[#b8f200] hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
                   >
                     <LogOut className="h-6 w-6" />
                   </button>
@@ -97,20 +123,166 @@ export const Navbar = () => {
               ) : (
                 <button
                   onClick={() => setIsLoginModalOpen(true)}
-                  className="text-[#b8f200] hover:text-[#b8f200] px-3 py-2 rounded-md text-sm font-medium"
+                  className="text-[#b8f200] hover:text-white px-3 py-2 rounded-md transition-colors"
                 >
                   <User className="h-6 w-6" />
                 </button>
               )}
             </div>
 
-            <div className="sm:hidden flex items-center">
-              <button className="p-2">
-                <Menu className="h-6 w-6 text-gray-700" />
-              </button>
+            {/* Mobile Right side - Shows below 1024px */}
+            <div className="flex items-center space-x-1 lg:hidden">
+              
+              {/* Cart Icon */}
+              <Link to="/cart" className="relative text-[#b8f200] hover:text-white px-2 py-2 transition-colors">
+                <ShoppingBag className="h-6 w-6" />
+                {cartProducts.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-[#b8f200] text-black text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                    {cartProducts.length}
+                  </span>
+                )}
+              </Link>
+
+              {/* User Section for Mobile */}
+              {user ? (
+                <button
+                  onClick={() => setIsMobileUserMenuOpen(!isMobileUserMenuOpen)}
+                  className="text-[#b8f200] hover:text-white px-2 py-2 rounded-md transition-colors"
+                >
+                  <User className="h-6 w-6" />
+                </button>
+              ) : (
+                <button
+                  onClick={() => setIsLoginModalOpen(true)}
+                  className="text-[#b8f200] hover:text-white px-2 py-2 rounded-md transition-colors"
+                >
+                  <User className="h-6 w-6" />
+                </button>
+              )}
             </div>
           </div>
         </div>
+
+        {/* Mobile Menu Dropdown - Shows below 1024px */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              className="lg:hidden bg-gray-900 border-t border-gray-700"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="px-4 py-3 space-y-2">
+                
+                {/* Logo for very small screens (under 480px) */}
+                <div className="min-[480px]:hidden flex justify-center py-2 mb-2">
+                  <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>
+                    <img className="h-8 w-auto" src={`${process.env.PUBLIC_URL}/img/logo1.png`} alt="kronos" />
+                  </Link>
+                </div>
+                
+                {/* Navigation Links */}
+                <button
+                  onClick={() => handleMobileNavigation('/')}
+                  className="block w-full text-left text-[#b8f200] hover:text-white hover:bg-gray-800 px-3 py-3 rounded-md text-base font-medium transition-colors"
+                >
+                  Home
+                </button>
+                
+                <button
+                  onClick={() => handleMobileNavigation('/products')}
+                  className="block w-full text-left text-[#b8f200] hover:text-white hover:bg-gray-800 px-3 py-3 rounded-md text-base font-medium transition-colors"
+                >
+                  Shop
+                </button>
+                
+                <button
+                  onClick={() => handleMobileNavigation('/about')}
+                  className="block w-full text-left text-[#b8f200] hover:text-white hover:bg-gray-800 px-3 py-3 rounded-md text-base font-medium transition-colors"
+                >
+                  About us
+                </button>
+
+                {/* Login link for non-authenticated users */}
+                {!user && (
+                  <button
+                    onClick={() => {
+                      setIsLoginModalOpen(true);
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="flex items-center w-full text-left text-[#b8f200] hover:text-white hover:bg-gray-800 px-3 py-3 rounded-md text-base font-medium transition-colors"
+                  >
+                    <User className="h-5 w-5 mr-3" />
+                    Login
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Mobile User Menu Dropdown - Only for logged in users below 1024px */}
+        <AnimatePresence>
+          {isMobileUserMenuOpen && user && (
+            <motion.div
+              className="lg:hidden bg-gray-900 border-t border-gray-700"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="px-4 py-3 space-y-2">
+                
+                {/* User Welcome */}
+                <div className="px-3 py-2">
+                  <p className="text-gray-400 text-sm">Welcome,</p>
+                  <p className="text-[#b8f200] font-medium">{user.name}!</p>
+                </div>
+                
+                {/* Favorites Link */}
+                <button
+                  onClick={() => {
+                    setIsFavoritesDrawerOpen(true);
+                    setIsMobileUserMenuOpen(false);
+                  }}
+                  className="flex items-center w-full text-left text-[#b8f200] hover:text-white hover:bg-gray-800 px-3 py-3 rounded-md text-base font-medium transition-colors"
+                >
+                  <Heart className="h-5 w-5 mr-3" />
+                  Favorites
+                  {favorites.length > 0 && (
+                    <span className="ml-auto bg-[#b8f200] text-black text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold">
+                      {favorites.length}
+                    </span>
+                  )}
+                </button>
+                
+                {/* Order History */}
+                <button
+                  onClick={() => {
+                    handleMobileNavigation('/orders');
+                    setIsMobileUserMenuOpen(false);
+                  }}
+                  className="block w-full text-left text-[#b8f200] hover:text-white hover:bg-gray-800 px-3 py-3 rounded-md text-base font-medium transition-colors"
+                >
+                  Order History
+                </button>
+                
+                {/* Logout */}
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setIsMobileUserMenuOpen(false);
+                  }}
+                  className="flex items-center w-full text-left text-red-400 hover:text-red-300 hover:bg-gray-800 px-3 py-3 rounded-md text-base font-medium transition-colors"
+                >
+                  <LogOut className="h-5 w-5 mr-3" />
+                  Logout
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
 
       {/* Login Modal */}
@@ -311,16 +483,14 @@ export const Navbar = () => {
                   <div className="flex gap-3">
                     <button
                       onClick={handleNavigateToCart}
-                      className="flex-1 bg-gray-800/50 text-white px-6 py-3 font-bold rounded-full hover:bg-gray-700/50 transition-colors duration-300 border border-gray-600/50 flex items-center justify-center gap-2 cursor-pointer relative z-30"
-                      style={{ pointerEvents: 'auto' }}
+                      className="flex-1 bg-gray-800/50 text-white px-6 py-3 font-bold rounded-full hover:bg-gray-700/50 transition-colors duration-300 border border-gray-600/50 flex items-center justify-center gap-2"
                     >
                       <ShoppingBag size={18} />
                       View Cart
                     </button>
                     <button
                       onClick={handleNavigateToProducts}
-                      className="flex-1 bg-[#b8f200] text-black px-6 py-3 font-bold rounded-full hover:bg-white transition-colors duration-300 flex items-center justify-center cursor-pointer relative z-30"
-                      style={{ pointerEvents: 'auto' }}
+                      className="flex-1 bg-[#b8f200] text-black px-6 py-3 font-bold rounded-full hover:bg-white transition-colors duration-300 flex items-center justify-center"
                     >
                       Continue Shopping
                     </button>
