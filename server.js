@@ -401,6 +401,97 @@ app.delete('/admin/users/:id', async (req, res) => {
   }
 });
 
+// Admin endpoint to get all subscribers
+app.get('/admin/subscribers', async (req, res) => {
+  try {
+    const subscribers = await subscribersCollection.find({}).sort({ subscribedAt: -1 }).toArray();
+    res.json(subscribers);
+  } catch (error) {
+    console.error('Error fetching subscribers:', error);
+    res.status(500).json({ error: 'Failed to fetch subscribers' });
+  }
+});
+
+// Admin endpoint to delete a subscriber
+app.delete('/admin/subscribers/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid subscriber ID' });
+    }
+
+    const result = await subscribersCollection.deleteOne({ _id: new ObjectId(id) });
+    
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: 'Subscriber not found' });
+    }
+
+    res.json({ message: 'Subscriber deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting subscriber:', error);
+    res.status(500).json({ error: 'Failed to delete subscriber' });
+  }
+});
+
+// Admin endpoint to get all contact messages
+app.get('/admin/contacts', async (req, res) => {
+  try {
+    const contacts = await contactsCollection.find({}).sort({ createdAt: -1 }).toArray();
+    res.json(contacts);
+  } catch (error) {
+    console.error('Error fetching contacts:', error);
+    res.status(500).json({ error: 'Failed to fetch contacts' });
+  }
+});
+
+// Admin endpoint to delete a contact message
+app.delete('/admin/contacts/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid contact ID' });
+    }
+
+    const result = await contactsCollection.deleteOne({ _id: new ObjectId(id) });
+    
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: 'Contact message not found' });
+    }
+
+    res.json({ message: 'Contact message deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting contact:', error);
+    res.status(500).json({ error: 'Failed to delete contact message' });
+  }
+});
+
+// Admin endpoint to mark contact as read/unread
+app.put('/admin/contacts/:id/status', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { isRead } = req.body;
+    
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid contact ID' });
+    }
+
+    const result = await contactsCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { isRead: isRead, updatedAt: new Date() } }
+    );
+    
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: 'Contact message not found' });
+    }
+
+    res.json({ message: 'Contact status updated successfully' });
+  } catch (error) {
+    console.error('Error updating contact status:', error);
+    res.status(500).json({ error: 'Failed to update contact status' });
+  }
+});
 
 
   // JWT Middleware

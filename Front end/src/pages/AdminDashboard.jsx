@@ -9,37 +9,35 @@ export const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // Add these state variables with your existing states at the top of the component
-const [orders, setOrders] = useState([]);
-const [showOrderForm, setShowOrderForm] = useState(false);
-const [currentOrder, setCurrentOrder] = useState({
-  customer: { name: '', email: '', phone: '' },
-  status: '',
-  totalAmount: '',
-  items: []
-});
-const [isEditingOrder, setIsEditingOrder] = useState(false);
-
-// Add these state variables with your existing states
-const [users, setUsers] = useState([]);
-const [showUserForm, setShowUserForm] = useState(false);
-const [currentUser, setCurrentUser] = useState({
-  name: '',
-  email: '',
-  registrationDate: ''
-});
-const [isEditingUser, setIsEditingUser] = useState(false);
-
-// Reset the user form
-const resetUserForm = () => {
-  setCurrentUser({
+  const [orders, setOrders] = useState([]);
+  const [subscribers, setSubscribers] = useState([]);
+  const [contacts, setContacts] = useState([]);
+  const [showOrderForm, setShowOrderForm] = useState(false);
+  const [currentOrder, setCurrentOrder] = useState({
+    customer: { name: '', email: '', phone: '' },
+    status: '',
+    totalAmount: '',
+    items: []
+  });
+  const [isEditingOrder, setIsEditingOrder] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [showUserForm, setShowUserForm] = useState(false);
+  const [currentUser, setCurrentUser] = useState({
     name: '',
     email: '',
     registrationDate: ''
   });
-  setIsEditingUser(false);
-};
+  const [isEditingUser, setIsEditingUser] = useState(false);
+
+  // Reset the user form
+  const resetUserForm = () => {
+    setCurrentUser({
+      name: '',
+      email: '',
+      registrationDate: ''
+    });
+    setIsEditingUser(false);
+  };
 
 // Open user form for editing an existing user
 const handleEditUser = (user) => {
@@ -276,15 +274,19 @@ const formatOrderDate = (dateString) => {
       // setStats(statsRes.data);
       
       // Option 2: Fetch each stat separately
-      const [usersRes, ordersRes, productsRes] = await Promise.all([
+      const [usersRes, ordersRes, productsRes, subscribersRes, contactsRes] = await Promise.all([
       axios.get(`${API_URL}/admin/users/count`),
       axios.get(`${API_URL}/admin/orders`),
-      axios.get(`${API_URL}/products`)
+      axios.get(`${API_URL}/products`),
+      axios.get(`${API_URL}/admin/subscribers`),
+      axios.get(`${API_URL}/admin/contacts`)
     ]);
       
-      // Set products data for products management
+      // Set products data for products orders management
       setProducts(productsRes.data);
-      setOrders(ordersRes.data); // Add this line to set orders data
+      setOrders(ordersRes.data);
+      setSubscribers(subscribersRes.data);
+      setContacts(contactsRes.data);
 
       // Fetch full users data for customers tab
       const allUsersRes = await axios.get(`${API_URL}/admin/users`);
@@ -439,6 +441,146 @@ const formatOrderDate = (dateString) => {
     }
   };
 
+  // Fetch subscribers data
+const fetchSubscribersData = async () => {
+  setLoading(true);
+  setError(null);
+  
+  try {
+    const subscribersRes = await axios.get(`${API_URL}/admin/subscribers`);
+    setSubscribers(subscribersRes.data);
+  } catch (err) {
+    console.error('Error fetching subscribers:', err);
+    setError('Failed to load subscribers data. Please try again later.');
+  } finally {
+    setLoading(false);
+  }
+};
+
+// Fetch contacts data
+const fetchContactsData = async () => {
+  setLoading(true);
+  setError(null);
+  
+  try {
+    const contactsRes = await axios.get(`${API_URL}/admin/contacts`);
+    setContacts(contactsRes.data);
+  } catch (err) {
+    console.error('Error fetching contacts:', err);
+    setError('Failed to load contacts data. Please try again later.');
+  } finally {
+    setLoading(false);
+  }
+};
+
+// Delete a subscriber
+const handleDeleteSubscriber = async (subscriberId) => {
+  if (window.confirm('Are you sure you want to delete this subscriber?')) {
+    setLoading(true);
+    
+    try {
+      await axios.delete(`${API_URL}/admin/subscribers/${subscriberId}`);
+      fetchSubscribersData();
+    } catch (err) {
+      console.error('Error deleting subscriber:', err);
+      setError('Failed to delete subscriber. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }
+};
+
+// Delete a contact
+const handleDeleteContact = async (contactId) => {
+  if (window.confirm('Are you sure you want to delete this contact message?')) {
+    setLoading(true);
+    
+    try {
+      await axios.delete(`${API_URL}/admin/contacts/${contactId}`);
+      fetchContactsData();
+    } catch (err) {
+      console.error('Error deleting contact:', err);
+      setError('Failed to delete contact message. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }
+};
+
+// Mark contact as read/unread
+const handleToggleContactStatus = async (contactId, currentStatus) => {
+  try {
+    await axios.put(`${API_URL}/admin/contacts/${contactId}/status`, {
+      isRead: !currentStatus
+    });
+    fetchContactsData();
+  } catch (err) {
+    console.error('Error updating contact status:', err);
+    setError('Failed to update contact status. Please try again.');
+  }
+};
+
+// Download subscribers as CSV
+const downloadSubscribersCSV = () => {
+  const csvContent = [
+    ['Email', 'Subscription Date'],
+    ...subscribers.map(sub => [
+      sub.email,
+      new Date(sub.subscribedAt).toLocaleDateString('en-US')
+    ])
+  ].map(row => row.join(',')).join('\n');
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', `subscribers_${new Date().toISOString().split('T')[0]}.csv`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+// Download contacts as CSV
+const downloadContactsCSV = () => {
+  const csvContent = [
+    ['Name', 'Email', 'Subject', 'Message', 'Date', 'Status'],
+    ...contacts.map(contact => [
+      contact.name,
+      contact.email,
+      contact.subject,
+      `"${contact.message.replace(/"/g, '""')}"`, // Escape quotes in message
+      new Date(contact.createdAt).toLocaleDateString('en-US'),
+      contact.isRead ? 'Read' : 'Unread'
+    ])
+  ].map(row => row.join(',')).join('\n');
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', `contacts_${new Date().toISOString().split('T')[0]}.csv`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+// Format date for display
+const formatContactDate = (dateString) => {
+  if (!dateString) return 'N/A';
+  try {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } catch (e) {
+    return 'Invalid date';
+  }
+};
   
   return (
     <div className="min-h-screen bg-gray-100">
@@ -507,8 +649,31 @@ const formatOrderDate = (dateString) => {
                 <span className="mr-3">👥</span>
                 Customers
               </button>
-              
-              
+
+              <button
+                onClick={() => setActiveTab('contacts')}
+                className={`w-full text-left px-4 py-2 rounded-md flex items-center text-sm font-medium ${
+                  activeTab === 'contacts' 
+                    ? 'bg-gray-900 text-white' 
+                    : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                }`}
+              >
+                <span className="mr-3">📞</span>
+                Contacts
+              </button>
+
+              <button
+                onClick={() => setActiveTab('subscribers')}
+                className={`w-full text-left px-4 py-2 rounded-md flex items-center text-sm font-medium ${
+                  activeTab === 'subscribers' 
+                    ? 'bg-gray-900 text-white' 
+                    : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                }`}
+              >
+                <span className="mr-3">📧</span>
+                Subscribers
+              </button>
+
             </div>
           </nav>
         </div>
@@ -1431,9 +1596,223 @@ const formatOrderDate = (dateString) => {
     )}
   </div>
 )}
+
+          {/* Subscribers Management Tab Content */}
+          {activeTab === 'subscribers' && (
+            <div>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-semibold">Newsletter Subscribers</h2>
+                <div className="flex items-center space-x-4">
+                  <div className="text-sm text-gray-600">
+                    Total Subscribers: {subscribers.length}
+                  </div>
+                  <button
+                    onClick={downloadSubscribersCSV}
+                    className="bg-green-500 hover:bg-green-600 text-white font-medium py-1 px-3 rounded-md text-sm transition-colors duration-300"
+                  >
+                    Download CSV
+                  </button>
+                  <button
+                    onClick={fetchSubscribersData}
+                    className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-3 rounded-md text-sm transition-colors duration-300"
+                  >
+                    Refresh
+                  </button>
+                </div>
+              </div>
+              
+              {loading ? (
+                <div className="flex justify-center items-center h-64">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                </div>
+              ) : error ? (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                  <p>{error}</p>
+                  <button 
+                    onClick={fetchSubscribersData}
+                    className="mt-2 bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded-md text-sm transition-colors duration-300"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              ) : (
+                <div className="bg-white shadow rounded-lg overflow-hidden">
+                  <div className="overflow-x-auto">
+                    {subscribers.length > 0 ? (
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Email
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Subscription Date
+                            </th>
+                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Actions
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                          {subscribers.map((subscriber) => (
+                            <tr key={subscriber._id}>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {subscriber.email}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {formatContactDate(subscriber.subscribedAt)}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <button
+                                  onClick={() => handleDeleteSubscriber(subscriber._id)}
+                                  className="text-red-600 hover:text-red-900"
+                                >
+                                  Delete
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <div className="px-6 py-8 text-center text-gray-500">
+                        <p>No subscribers found</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Contacts Management Tab Content */}
+          {activeTab === 'contacts' && (
+            <div>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-semibold">Contact Messages</h2>
+                <div className="flex items-center space-x-4">
+                  <div className="text-sm text-gray-600">
+                    Total Messages: {contacts.length} | Unread: {contacts.filter(c => !c.isRead).length}
+                  </div>
+                  <button
+                    onClick={downloadContactsCSV}
+                    className="bg-green-500 hover:bg-green-600 text-white font-medium py-1 px-3 rounded-md text-sm transition-colors duration-300"
+                  >
+                    Download CSV
+                  </button>
+                  <button
+                    onClick={fetchContactsData}
+                    className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-3 rounded-md text-sm transition-colors duration-300"
+                  >
+                    Refresh
+                  </button>
+                </div>
+              </div>
+              
+              {loading ? (
+                <div className="flex justify-center items-center h-64">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                </div>
+              ) : error ? (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                  <p>{error}</p>
+                  <button 
+                    onClick={fetchContactsData}
+                    className="mt-2 bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded-md text-sm transition-colors duration-300"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              ) : (
+                <div className="bg-white shadow rounded-lg overflow-hidden">
+                  <div className="overflow-x-auto">
+                    {contacts.length > 0 ? (
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Status
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Name
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Email
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Subject
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Message
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Date
+                            </th>
+                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Actions
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                          {contacts.map((contact) => (
+                            <tr key={contact._id} className={contact.isRead ? 'bg-gray-50' : 'bg-white'}>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <button
+                                  onClick={() => handleToggleContactStatus(contact._id, contact.isRead)}
+                                  className={`px-2 py-1 text-xs font-medium rounded-full ${
+                                    contact.isRead 
+                                      ? 'bg-green-100 text-green-800 hover:bg-green-200' 
+                                      : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
+                                  } transition-colors cursor-pointer`}
+                                >
+                                  {contact.isRead ? 'Read' : 'Unread'}
+                                </button>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                {contact.name}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {contact.email}
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-900 max-w-xs">
+                                <div className="truncate" title={contact.subject}>
+                                  {contact.subject}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-900 max-w-sm">
+                                <div className="truncate" title={contact.message}>
+                                  {contact.message.substring(0, 100)}
+                                  {contact.message.length > 100 ? '...' : ''}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {formatContactDate(contact.createdAt)}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <button
+                                  onClick={() => handleDeleteContact(contact._id)}
+                                  className="text-red-600 hover:text-red-900"
+                                >
+                                  Delete
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <div className="px-6 py-8 text-center text-gray-500">
+                        <p>No contact messages found</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
           
           {/* Placeholder content for other tabs */}
-          {activeTab !== 'overview' && activeTab !== 'products' && activeTab !== 'orders' && activeTab !== 'customers' && (
+          {activeTab !== 'overview' && activeTab !== 'products' && activeTab !== 'orders' && activeTab !== 'customers' && activeTab !== 'contacts' && activeTab !== 'subscribers' && (
             <div className="bg-white p-6 rounded-lg shadow">
               <h2 className="text-xl font-semibold mb-4 capitalize">{activeTab}</h2>
               <p className="text-gray-600">
