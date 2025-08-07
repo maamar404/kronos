@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
+import { LoadingScreen } from './components/LoadingScreen'; // Import the loading screen
 import { Home } from './pages/Home';
 import { Products } from './pages/Products';
 import { ProductDetail } from './pages/ProductDetail';
@@ -28,7 +29,6 @@ import { ProductProvider } from './contexts/ProductContext';
 import { AdminLogin } from './pages/AdminLogin';
 import { AdminDashboard } from './pages/AdminDashboard';
 import './App.css';
-
 
 function App() {
   const location = useLocation();
@@ -79,6 +79,18 @@ function App() {
 }
 
 function AppWrapper() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  const handleLoadingComplete = () => {
+    setIsLoading(false);
+  };
+
+  // Show loading screen first
+  if (isLoading) {
+    return <LoadingScreen onLoadingComplete={handleLoadingComplete} />;
+  }
+
+  // After loading, show the main app
   return (
     <Router>
       <App />

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { Popconfirm } from 'antd';
+import 'antd/dist/reset.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:4000';
 
@@ -477,35 +479,31 @@ const fetchContactsData = async () => {
 
 // Delete a subscriber
 const handleDeleteSubscriber = async (subscriberId) => {
-  if (window.confirm('Are you sure you want to delete this subscriber?')) {
-    setLoading(true);
-    
-    try {
-      await axios.delete(`${API_URL}/admin/subscribers/${subscriberId}`);
-      fetchSubscribersData();
-    } catch (err) {
-      console.error('Error deleting subscriber:', err);
-      setError('Failed to delete subscriber. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+  setLoading(true);
+  
+  try {
+    await axios.delete(`${API_URL}/admin/subscribers/${subscriberId}`);
+    fetchSubscribersData();
+  } catch (err) {
+    console.error('Error deleting subscriber:', err);
+    setError('Failed to delete subscriber. Please try again.');
+  } finally {
+    setLoading(false);
   }
 };
 
 // Delete a contact
 const handleDeleteContact = async (contactId) => {
-  if (window.confirm('Are you sure you want to delete this contact message?')) {
-    setLoading(true);
-    
-    try {
-      await axios.delete(`${API_URL}/admin/contacts/${contactId}`);
-      fetchContactsData();
-    } catch (err) {
-      console.error('Error deleting contact:', err);
-      setError('Failed to delete contact message. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+  setLoading(true);
+  
+  try {
+    await axios.delete(`${API_URL}/admin/contacts/${contactId}`);
+    fetchContactsData();
+  } catch (err) {
+    console.error('Error deleting contact:', err);
+    setError('Failed to delete contact message. Please try again.');
+  } finally {
+    setLoading(false);
   }
 };
 
@@ -1677,12 +1675,18 @@ const formatContactDate = (dateString) => {
                                 {formatContactDate(subscriber.subscribedAt)}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <button
-                                  onClick={() => handleDeleteSubscriber(subscriber._id)}
-                                  className="text-red-600 hover:text-red-900"
+                                <Popconfirm
+                                  title="Delete Subscriber"
+                                  description={`Remove ${subscriber.email} from newsletter?`}
+                                  onConfirm={() => handleDeleteSubscriber(subscriber._id)}
+                                  okText="Delete"
+                                  cancelText="Cancel"
+                                  okType="danger"
                                 >
-                                  Delete
-                                </button>
+                                  <button className="text-red-600 hover:text-red-900">
+                                    Delete
+                                  </button>
+                                </Popconfirm>
                               </td>
                             </tr>
                           ))}
@@ -1739,7 +1743,7 @@ const formatContactDate = (dateString) => {
                 </div>
               ) : (
                 <>
-                  {/* Contact Details Modal */}
+                  {/* Contact Details Modal - KEEP AS IS */}
                   {showContactModal && selectedContact && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                       <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-screen overflow-y-auto">
@@ -1796,15 +1800,23 @@ const formatContactDate = (dateString) => {
                         </div>
                         
                         <div className="flex justify-between items-center p-6 border-t bg-gray-50">
-                          <button
-                            onClick={() => {
+                          {/* ADD POPCONFIRM HERE FOR MODAL DELETE BUTTON */}
+                          <Popconfirm
+                            title="Delete Contact Message"
+                            description="Are you sure you want to delete this contact message? This action cannot be undone."
+                            onConfirm={() => {
                               handleDeleteContact(selectedContact._id);
                               closeContactModal();
                             }}
-                            className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-300"
+                            okText="Yes, Delete"
+                            cancelText="Cancel"
+                            okType="danger"
+                            placement="topRight"
                           >
-                            Delete Message
-                          </button>
+                            <button className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-300">
+                              Delete Message
+                            </button>
+                          </Popconfirm>
                           <button
                             onClick={closeContactModal}
                             className="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-300"
@@ -1816,7 +1828,7 @@ const formatContactDate = (dateString) => {
                     </div>
                   )}
 
-                  {/* Compact Contact List */}
+                  {/* Compact Contact List - KEEP AS IS */}
                   <div className="bg-white shadow rounded-lg overflow-hidden">
                     {contacts.length > 0 ? (
                       <div className="divide-y divide-gray-200">
@@ -1866,18 +1878,30 @@ const formatContactDate = (dateString) => {
                                 }`}>
                                   {contact.isRead ? 'Read' : 'New'}
                                 </span>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
+                                {/* ADD POPCONFIRM HERE FOR LIST DELETE BUTTON */}
+                                <Popconfirm
+                                  title="Delete Contact"
+                                  description={`Are you sure you want to delete the message from ${contact.name}?`}
+                                  onConfirm={(e) => {
+                                    e?.stopPropagation();
                                     handleDeleteContact(contact._id);
                                   }}
-                                  className="text-red-500 hover:text-red-700 p-1 rounded transition-colors"
-                                  title="Delete message"
+                                  onCancel={(e) => e?.stopPropagation()}
+                                  okText="Delete"
+                                  cancelText="Cancel"
+                                  okType="danger"
+                                  placement="topRight"
                                 >
-                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                  </svg>
-                                </button>
+                                  <button
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="text-red-500 hover:text-red-700 p-1 rounded transition-colors"
+                                    title="Delete message"
+                                  >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                  </button>
+                                </Popconfirm>
                               </div>
                             </div>
                           </div>
@@ -1886,7 +1910,7 @@ const formatContactDate = (dateString) => {
                     ) : (
                       <div className="px-6 py-8 text-center text-gray-500">
                         <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2v10a2 2 0 002 2z" />
                         </svg>
                         <p className="text-lg font-medium mb-2">No contact messages</p>
                         <p>Contact messages will appear here when customers reach out.</p>
