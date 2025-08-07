@@ -13,6 +13,8 @@ export const AdminDashboard = () => {
   const [subscribers, setSubscribers] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [showOrderForm, setShowOrderForm] = useState(false);
+  const [selectedContact, setSelectedContact] = useState(null);
+  const [showContactModal, setShowContactModal] = useState(false);
   const [currentOrder, setCurrentOrder] = useState({
     customer: { name: '', email: '', phone: '' },
     status: '',
@@ -581,6 +583,18 @@ const formatContactDate = (dateString) => {
     return 'Invalid date';
   }
 };
+
+    // Add this function to open contact details modal
+    const handleViewContact = (contact) => {
+      setSelectedContact(contact);
+      setShowContactModal(true);
+    };
+
+    // Add this function to close the modal
+    const closeContactModal = () => {
+      setSelectedContact(null);
+      setShowContactModal(false);
+    };
   
   return (
     <div className="min-h-screen bg-gray-100">
@@ -1692,7 +1706,7 @@ const formatContactDate = (dateString) => {
                 <h2 className="text-xl font-semibold">Contact Messages</h2>
                 <div className="flex items-center space-x-4">
                   <div className="text-sm text-gray-600">
-                    Total Messages: {contacts.length} | Unread: {contacts.filter(c => !c.isRead).length}
+                    Total: {contacts.length} | Unread: {contacts.filter(c => !c.isRead).length}
                   </div>
                   <button
                     onClick={downloadContactsCSV}
@@ -1724,89 +1738,162 @@ const formatContactDate = (dateString) => {
                   </button>
                 </div>
               ) : (
-                <div className="bg-white shadow rounded-lg overflow-hidden">
-                  <div className="overflow-x-auto">
+                <>
+                  {/* Contact Details Modal */}
+                  {showContactModal && selectedContact && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                      <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-screen overflow-y-auto">
+                        <div className="flex justify-between items-center p-6 border-b">
+                          <h3 className="text-xl font-semibold">Contact Details</h3>
+                          <button
+                            onClick={closeContactModal}
+                            className="text-gray-500 hover:text-gray-700 text-2xl"
+                          >
+                            &times;
+                          </button>
+                        </div>
+                        
+                        <div className="p-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                              <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">{selectedContact.name}</p>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                              <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">{selectedContact.email}</p>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                              <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">{formatContactDate(selectedContact.createdAt)}</p>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                              <button
+                                onClick={() => handleToggleContactStatus(selectedContact._id, selectedContact.isRead)}
+                                className={`px-3 py-1 text-sm font-medium rounded-full ${
+                                  selectedContact.isRead 
+                                    ? 'bg-green-100 text-green-800 hover:bg-green-200' 
+                                    : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
+                                } transition-colors cursor-pointer`}
+                              >
+                                {selectedContact.isRead ? 'Read' : 'Unread'} - Click to toggle
+                              </button>
+                            </div>
+                          </div>
+                          
+                          <div className="mb-6">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+                            <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">{selectedContact.subject}</p>
+                          </div>
+                          
+                          <div className="mb-6">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Message</label>
+                            <div className="text-sm text-gray-900 bg-gray-50 p-4 rounded border whitespace-pre-wrap max-h-64 overflow-y-auto">
+                              {selectedContact.message}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex justify-between items-center p-6 border-t bg-gray-50">
+                          <button
+                            onClick={() => {
+                              handleDeleteContact(selectedContact._id);
+                              closeContactModal();
+                            }}
+                            className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-300"
+                          >
+                            Delete Message
+                          </button>
+                          <button
+                            onClick={closeContactModal}
+                            className="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-300"
+                          >
+                            Close
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Compact Contact List */}
+                  <div className="bg-white shadow rounded-lg overflow-hidden">
                     {contacts.length > 0 ? (
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Status
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Name
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Email
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Subject
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Message
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Date
-                            </th>
-                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Actions
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200">
-                          {contacts.map((contact) => (
-                            <tr key={contact._id} className={contact.isRead ? 'bg-gray-50' : 'bg-white'}>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <button
-                                  onClick={() => handleToggleContactStatus(contact._id, contact.isRead)}
-                                  className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                    contact.isRead 
-                                      ? 'bg-green-100 text-green-800 hover:bg-green-200' 
-                                      : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
-                                  } transition-colors cursor-pointer`}
-                                >
-                                  {contact.isRead ? 'Read' : 'Unread'}
-                                </button>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                {contact.name}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {contact.email}
-                              </td>
-                              <td className="px-6 py-4 text-sm text-gray-900 max-w-xs">
-                                <div className="truncate" title={contact.subject}>
-                                  {contact.subject}
+                      <div className="divide-y divide-gray-200">
+                        {contacts.map((contact) => (
+                          <div 
+                            key={contact._id} 
+                            className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
+                              contact.isRead ? 'bg-white' : 'bg-blue-50 border-l-4 border-blue-500'
+                            }`}
+                            onClick={() => handleViewContact(contact)}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center space-x-3">
+                                  <div className="flex-shrink-0">
+                                    <div className={`w-3 h-3 rounded-full ${
+                                      contact.isRead ? 'bg-gray-400' : 'bg-blue-500'
+                                    }`}></div>
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center justify-between mb-1">
+                                      <p className="text-sm font-medium text-gray-900 truncate">
+                                        {contact.name}
+                                      </p>
+                                      <p className="text-xs text-gray-500 flex-shrink-0 ml-2">
+                                        {formatContactDate(contact.createdAt)}
+                                      </p>
+                                    </div>
+                                    <p className="text-sm text-gray-600 truncate">
+                                      {contact.email}
+                                    </p>
+                                    <p className="text-sm font-medium text-gray-800 mt-1 truncate">
+                                      {contact.subject}
+                                    </p>
+                                    <p className="text-sm text-gray-600 mt-1 truncate">
+                                      {contact.message.substring(0, 80)}
+                                      {contact.message.length > 80 ? '...' : ''}
+                                    </p>
+                                  </div>
                                 </div>
-                              </td>
-                              <td className="px-6 py-4 text-sm text-gray-900 max-w-sm">
-                                <div className="truncate" title={contact.message}>
-                                  {contact.message.substring(0, 100)}
-                                  {contact.message.length > 100 ? '...' : ''}
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {formatContactDate(contact.createdAt)}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                              </div>
+                              <div className="flex items-center space-x-2 ml-4">
+                                <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                                  contact.isRead 
+                                    ? 'bg-green-100 text-green-800' 
+                                    : 'bg-yellow-100 text-yellow-800'
+                                }`}>
+                                  {contact.isRead ? 'Read' : 'New'}
+                                </span>
                                 <button
-                                  onClick={() => handleDeleteContact(contact._id)}
-                                  className="text-red-600 hover:text-red-900"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteContact(contact._id);
+                                  }}
+                                  className="text-red-500 hover:text-red-700 p-1 rounded transition-colors"
+                                  title="Delete message"
                                 >
-                                  Delete
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
                                 </button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     ) : (
                       <div className="px-6 py-8 text-center text-gray-500">
-                        <p>No contact messages found</p>
+                        <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        <p className="text-lg font-medium mb-2">No contact messages</p>
+                        <p>Contact messages will appear here when customers reach out.</p>
                       </div>
                     )}
                   </div>
-                </div>
+                </>
               )}
             </div>
           )}
