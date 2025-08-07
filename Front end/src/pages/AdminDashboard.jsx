@@ -597,17 +597,37 @@ const formatContactDate = (dateString) => {
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Admin Header */}
-      <header className="bg-white shadow">
-        <div className="flex justify-between items-center px-4 py-4 sm:px-6 lg:px-8">
-          <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-          <button
-            onClick={handleLogout}
-            className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-300"
-          >
-            Logout
-          </button>
-        </div>
-      </header>
+      <header className="bg-white shadow-sm border-b border-gray-200">
+  <div className="flex justify-between items-center px-4 py-5 sm:px-6 lg:px-8">
+    <div className="flex items-center space-x-4">
+      <h1 className="text-3xl font-light text-gray-900 tracking-wide">
+        Admin <span className="font-bold">Dashboard</span>
+      </h1>
+      <div className="hidden sm:block">
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+          <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+          Live
+        </span>
+      </div>
+    </div>
+    
+    <div className="flex items-center space-x-4">
+      <div className="hidden lg:block text-sm text-gray-600">
+        Last login: {new Date().toLocaleDateString()}
+      </div>
+      
+      <button
+        onClick={handleLogout}
+        className="inline-flex items-center px-4 py-2 border border-red-300 rounded-lg text-sm font-medium text-red-700 bg-white hover:bg-red-50 hover:border-red-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+      >
+        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        </svg>
+        Sign Out
+      </button>
+    </div>
+  </div>
+</header>
       
       <div className="flex">
         {/* Sidebar */}
