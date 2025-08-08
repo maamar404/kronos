@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/kronos/static/css/main.3e22b93d.css",
-    "main.js": "/kronos/static/js/main.0cfbea9d.js",
+    "main.js": "/kronos/static/js/main.1f93119c.js",
     "index.html": "/kronos/index.html",
     "main.3e22b93d.css.map": "/kronos/static/css/main.3e22b93d.css.map",
-    "main.0cfbea9d.js.map": "/kronos/static/js/main.0cfbea9d.js.map"
+    "main.1f93119c.js.map": "/kronos/static/js/main.1f93119c.js.map"
   },
   "entrypoints": [
     "static/css/main.3e22b93d.css",
-    "static/js/main.0cfbea9d.js"
+    "static/js/main.1f93119c.js"
   ]
 }
