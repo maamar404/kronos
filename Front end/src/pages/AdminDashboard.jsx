@@ -90,7 +90,7 @@ const handleSubmitUser = async (e) => {
 
 // Delete a user
 const handleDeleteUser = async (userId) => {
-  if (window.confirm('Are you sure you want to delete this user?')) {
+  
     setLoading(true);
     
     try {
@@ -101,7 +101,7 @@ const handleDeleteUser = async (userId) => {
       setError('Failed to delete user. Please try again.');
     } finally {
       setLoading(false);
-    }
+    
   }
 };
 
@@ -202,7 +202,6 @@ const handleSubmitOrder = async (e) => {
 
 // Delete an order
 const handleDeleteOrder = async (orderId) => {
-  if (window.confirm('Are you sure you want to delete this order?')) {
     setLoading(true);
     
     try {
@@ -213,7 +212,7 @@ const handleDeleteOrder = async (orderId) => {
       setError('Failed to delete order. Please try again.');
     } finally {
       setLoading(false);
-    }
+    
   }
 };
 
@@ -430,7 +429,6 @@ const formatOrderDate = (dateString) => {
   
   // Delete a product
   const handleDeleteProduct = async (productId) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
       setLoading(true);
       
       try {
@@ -442,7 +440,7 @@ const formatOrderDate = (dateString) => {
       } finally {
         setLoading(false);
       }
-    }
+    
   };
 
   // Fetch subscribers data
@@ -1187,12 +1185,16 @@ const formatContactDate = (dateString) => {
                                   >
                                     Edit
                                   </button>
-                                  <button
-                                    onClick={() => handleDeleteProduct(product._id)}
-                                    className="text-red-600 hover:text-red-900"
+                                  <Popconfirm
+                                    title="Are you sure you want to delete this product?"
+                                    onConfirm={() => handleDeleteProduct(product._id)}
+                                    okText="Yes"
+                                    cancelText="No"
                                   >
-                                    Delete
-                                  </button>
+                                    <button className="text-red-600 hover:text-red-900">
+                                      Delete
+                                    </button>
+                                  </Popconfirm>
                                 </td>
                               </tr>
                             ))}
@@ -1441,12 +1443,16 @@ const formatContactDate = (dateString) => {
                         >
                           Edit
                         </button>
-                        <button
-                          onClick={() => handleDeleteOrder(order._id)}
-                          className="text-red-600 hover:text-red-900"
+                        <Popconfirm
+                          title="Are you sure you want to delete this order?"
+                          onConfirm={() => handleDeleteOrder(order._id)}
+                          okText="Yes"
+                          cancelText="No"
                         >
-                          Delete
-                        </button>
+                          <button className="text-red-600 hover:text-red-900">
+                            Delete
+                          </button>
+                        </Popconfirm>
                       </td>
                     </tr>
                   ))}
@@ -1606,12 +1612,16 @@ const formatContactDate = (dateString) => {
                         >
                           Edit
                         </button>
-                        <button
-                          onClick={() => handleDeleteUser(user._id)}
-                          className="text-red-600 hover:text-red-900"
+                        <Popconfirm
+                          title="Are you sure you want to delete this user?"
+                          onConfirm={() => handleDeleteUser(user._id)}
+                          okText="Yes"
+                          cancelText="No"
                         >
-                          Delete
-                        </button>
+                          <button className="text-red-600 hover:text-red-900">
+                            Delete
+                          </button>
+                        </Popconfirm>
                       </td>
                     </tr>
                   ))}
