@@ -618,7 +618,7 @@ app.post('/create-order', authenticateToken, async (req, res) => {
       totalAmount,
       customer,
       paymentIntentId,
-      status: 'Processing',
+      status: 'Pending',
       createdAt: new Date(),
       platform
     });
@@ -662,7 +662,7 @@ app.get('/verify-payment/:sessionId', authenticateToken, async (req, res) => {
     try {
       const query = {
         'customer.email': req.user.email,
-        status: { $in: ['processing', 'shipped', 'delivered', 'succeeded'] }
+        status: { $in: ['processing', 'shipped', 'delivered', 'succeeded','completed','pending'] }
       };
       console.log('Query:', query); // Log the query
   

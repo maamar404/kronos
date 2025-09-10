@@ -147,7 +147,7 @@ export const Success = () => {
             </p>
           )}
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/products')}
             className="bg-gradient-to-r from-[#B8F200] to-[#2F3AE4] text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-shadow duration-200"
           >
             Continue Shopping

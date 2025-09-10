@@ -31,7 +31,6 @@ export const CartProvider = ({ children }) => {
   // Memoize clearCart to prevent unnecessary re-renders
   const clearCart = useCallback(() => {
     setCartProducts([]);
-    message.success('Cart cleared successfully');
   }, []); // Empty dependency array means this function never changes
 
   const addToCart = (product) => {

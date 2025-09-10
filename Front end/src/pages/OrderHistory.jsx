@@ -65,6 +65,8 @@ export const OrderHistory = () => {
         return 'bg-[#B8F200]/20 text-[#B8F200] border-[#B8F200]/40';
       case 'cancelled':
         return 'bg-red-500/20 text-red-400 border-red-500/40';
+      case 'completed':
+        return 'bg-green-500/20 text-green-400 border-green-500/40';
       default:
         return 'bg-gray-500/20 text-gray-400 border-gray-500/40';
     }
@@ -94,6 +96,12 @@ export const OrderHistory = () => {
         return (
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        );
+      case 'completed':
+        return (
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         );
       default:
