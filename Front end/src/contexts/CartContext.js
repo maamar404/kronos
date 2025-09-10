@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect } from 'react';
+import { createContext, useState, useEffect, useCallback } from 'react';
 import { message } from 'antd';
 
 export const CartContext = createContext();
@@ -28,10 +28,11 @@ export const CartProvider = ({ children }) => {
     }
   }, [cartProducts]);
 
-  const clearCart = () => {
+  // Memoize clearCart to prevent unnecessary re-renders
+  const clearCart = useCallback(() => {
     setCartProducts([]);
     message.success('Cart cleared successfully');
-  };
+  }, []); // Empty dependency array means this function never changes
 
   const addToCart = (product) => {
     const existingProductIndex = cartProducts.findIndex(
@@ -96,7 +97,13 @@ export const CartProvider = ({ children }) => {
   };
 
   return (
-    <CartContext.Provider value={{ cartProducts, setCartProducts, addToCart, removeFromCart, clearCart, }}>
+    <CartContext.Provider value={{ 
+      cartProducts, 
+      setCartProducts, 
+      addToCart, 
+      removeFromCart, 
+      clearCart,
+    }}>
       {children}
     </CartContext.Provider>
   );

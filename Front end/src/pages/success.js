@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { message } from 'antd';
 import { CartContext } from '../contexts/CartContext';
@@ -11,8 +11,15 @@ export const Success = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { clearCart } = useContext(CartContext);
+  
+  // Use a ref to track if we've processed the payment
+  const hasProcessedRef = useRef(false);
 
   useEffect(() => {
+    // Prevent multiple executions
+    if (hasProcessedRef.current) return;
+    hasProcessedRef.current = true;
+
     const verifyPaymentAndCreateOrder = async () => {
       const urlParams = new URLSearchParams(location.search);
       const sessionId = urlParams.get('session_id');
