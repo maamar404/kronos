@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/kronos/static/css/main.3e22b93d.css",
-    "main.js": "/kronos/static/js/main.eb6e0232.js",
+    "main.css": "/kronos/static/css/main.e9da8e52.css",
+    "main.js": "/kronos/static/js/main.8d39f04b.js",
     "index.html": "/kronos/index.html",
-    "main.3e22b93d.css.map": "/kronos/static/css/main.3e22b93d.css.map",
-    "main.eb6e0232.js.map": "/kronos/static/js/main.eb6e0232.js.map"
+    "main.e9da8e52.css.map": "/kronos/static/css/main.e9da8e52.css.map",
+    "main.8d39f04b.js.map": "/kronos/static/js/main.8d39f04b.js.map"
   },
   "entrypoints": [
-    "static/css/main.3e22b93d.css",
-    "static/js/main.eb6e0232.js"
+    "static/css/main.e9da8e52.css",
+    "static/js/main.8d39f04b.js"
   ]
 }
