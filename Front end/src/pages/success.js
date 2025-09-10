@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import { message } from 'antd';
 import { CartContext } from '../contexts/CartContext';
+
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:4000';
 
 export const Success = () => {
@@ -9,7 +10,7 @@ export const Success = () => {
   const [orderId, setOrderId] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
-  const { clearCart } = React.useContext(CartContext);
+  const { clearCart } = useContext(CartContext);
 
   useEffect(() => {
     const verifyPaymentAndCreateOrder = async () => {
@@ -17,14 +18,19 @@ export const Success = () => {
       const sessionId = urlParams.get('session_id');
       
       if (!sessionId) {
-        toast.error('Invalid session ID');
+        message.error('Invalid session ID');
         setIsLoading(false);
         return;
       }
 
       try {
         const token = localStorage.getItem('token');
-        
+        if (!token) {
+          message.error('Authentication required');
+          navigate('/login');
+          return;
+        }
+
         // 1. Verify payment
         const verifyResponse = await fetch(`${API_URL}/verify-payment/${sessionId}`, {
           headers: {
@@ -62,23 +68,37 @@ export const Success = () => {
             })
           });
 
-          if (!orderResponse.ok) {
+          // Handle 409 conflict (order already exists)
+          if (orderResponse.status === 409) {
+            const conflictData = await orderResponse.json();
+            setOrderId(conflictData.orderId);
+            console.log('Order already exists, using existing order ID:', conflictData.orderId);
+          } 
+          // Handle other errors
+          else if (!orderResponse.ok) {
             throw new Error('Failed to create order');
           }
-
-          const orderData = await orderResponse.json();
-          setOrderId(orderData.orderId);
+          // Handle success
+          else {
+            const orderData = await orderResponse.json();
+            setOrderId(orderData.orderId);
+          }
           
-          // 3. Clear cart
+          // 3. Clear cart regardless of whether order was just created or already exists
           clearCart();
-
-          toast.success('Payment successful! Your order has been created.');
+          
+          message.success('Payment successful! Your order has been processed.');
         } else {
           throw new Error('Payment not completed');
         }
       } catch (error) {
         console.error('Error:', error);
-        toast.error('Error processing your order: ' + error.message);
+        
+        // Don't show error for 409 conflicts, as they're expected
+        if (!error.message.includes('409')) {
+          message.error('Error processing your order: ' + error.message);
+        }
+        
         navigate('/cart');
       } finally {
         setIsLoading(false);
@@ -86,11 +106,11 @@ export const Success = () => {
     };
 
     verifyPaymentAndCreateOrder();
-  }, [location, navigate]);
+  }, [location, navigate, clearCart]);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-blue-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2F3AE4] mx-auto"></div>
           <p className="mt-4 text-gray-600">Processing your order...</p>

@@ -1,16 +1,35 @@
-import { createContext, useState } from 'react';
+import { createContext, useState, useEffect } from 'react';
 import { message } from 'antd';
 
 export const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-  const [cartProducts, setCartProducts] = useState(
-    JSON.parse(localStorage.getItem("cartProducts")) || []
-  );
+  const [cartProducts, setCartProducts] = useState([]);
+
+  // Load cart from localStorage on component mount
+  useEffect(() => {
+    const savedCart = localStorage.getItem("cartProducts");
+    if (savedCart) {
+      try {
+        setCartProducts(JSON.parse(savedCart));
+      } catch (error) {
+        console.error('Error parsing cart from localStorage:', error);
+        localStorage.removeItem("cartProducts");
+      }
+    }
+  }, []);
+
+  // Save cart to localStorage whenever it changes
+  useEffect(() => {
+    if (cartProducts.length > 0) {
+      localStorage.setItem("cartProducts", JSON.stringify(cartProducts));
+    } else {
+      localStorage.removeItem("cartProducts");
+    }
+  }, [cartProducts]);
 
   const clearCart = () => {
     setCartProducts([]);
-    localStorage.removeItem("cartProducts");
     message.success('Cart cleared successfully');
   };
 
@@ -23,7 +42,6 @@ export const CartProvider = ({ children }) => {
       const updatedCart = [...cartProducts];
       updatedCart[existingProductIndex].quantity += 1;
       setCartProducts(updatedCart);
-      localStorage.setItem("cartProducts", JSON.stringify(updatedCart));
 
       message.info({
         content: (
@@ -39,7 +57,6 @@ export const CartProvider = ({ children }) => {
     } else {
       const updatedCart = [...cartProducts, { ...product, quantity: 1 }];
       setCartProducts(updatedCart);
-      localStorage.setItem("cartProducts", JSON.stringify(updatedCart));
 
       message.success({
         content: (
@@ -64,7 +81,6 @@ export const CartProvider = ({ children }) => {
       (product) => !(product.id === productId && product.size === size)
     );
     setCartProducts(updatedCart);
-    localStorage.setItem("cartProducts", JSON.stringify(updatedCart));
 
     message.warning({
       content: (
@@ -80,7 +96,7 @@ export const CartProvider = ({ children }) => {
   };
 
   return (
-    <CartContext.Provider value={{ cartProducts, setCartProducts, addToCart, removeFromCart, clearCart }}>
+    <CartContext.Provider value={{ cartProducts, setCartProducts, addToCart, removeFromCart, clearCart, }}>
       {children}
     </CartContext.Provider>
   );
