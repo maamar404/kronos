@@ -10,7 +10,7 @@ const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
 export const Checkout = () => {
   const { cartProducts, setClearCart } = useContext(CartContext);
-  const [isLoading, setIsLoading] = useState(false); // Loading state
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -45,8 +45,8 @@ export const Checkout = () => {
     return true;
   };
 
-   // Handle payment
-   const handlePayment = async () => {
+  // Handle payment
+  const handlePayment = async () => {
     if (total <= 0 || cartProducts.length === 0) {
       toast.error('Your cart is empty or the total amount is invalid.');
       return;
@@ -56,7 +56,7 @@ export const Checkout = () => {
       return;
     }
 
-    setIsLoading(true); // Start loading
+    setIsLoading(true);
     try {
       const token = localStorage.getItem('token');
       const headers = {
@@ -67,7 +67,12 @@ export const Checkout = () => {
       const response = await fetch(`${API_URL}/create-checkout-session`, {
         method: 'POST',
         headers: headers,
-        body: JSON.stringify({ totalAmount: total, items: cartProducts, customer: formData }),
+        body: JSON.stringify({ 
+          totalAmount: total, 
+          items: cartProducts, 
+          customer: formData,
+          platform: 'web'
+        }),
       });
 
       if (!response.ok) {
@@ -81,16 +86,13 @@ export const Checkout = () => {
       if (result.error) {
         console.error('Payment error:', result.error.message);
         toast.error('Payment failed: ' + result.error.message);
-      } else {
-        setClearCart(true);
-        localStorage.removeItem('cartProducts'); // Clear only cart data
-        toast.success('Payment Successful!');
       }
+      // If successful, the user will be redirected to the success URL
     } catch (error) {
       console.error('Error during payment:', error);
       toast.error('Error during payment: ' + error.message);
     } finally {
-      setIsLoading(false); // Stop loading
+      setIsLoading(false);
     }
   };
 
