@@ -618,7 +618,7 @@ app.post('/create-order', authenticateToken, async (req, res) => {
       totalAmount,
       customer,
       paymentIntentId,
-      status: 'Pending',
+      status: 'processing',
       createdAt: new Date(),
       platform
     });
