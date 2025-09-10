@@ -657,24 +657,28 @@ app.get('/verify-payment/:sessionId', authenticateToken, async (req, res) => {
 
   // Get User Orders
   // Fetch Orders for Authenticated User
-  app.get('/orders', authenticateToken, async (req, res) => {
-    console.log('Fetching orders for:', req.user.email); // Log the email
-    try {
-      const query = {
-        'customer.email': req.user.email,
-        status: { $in: ['processing', 'shipped', 'delivered', 'succeeded','completed','pending'] }
-      };
-      console.log('Query:', query); // Log the query
-  
-      const orders = await ordersCollection.find(query).toArray();
-      console.log('Orders found:', orders); // Log the orders
-  
-      res.json(orders);
-    } catch (error) {
-      console.error('Error fetching orders:', error);
-      res.status(500).json({ error: 'Failed to fetch orders' });
-    }
-  });
+    app.get('/orders', authenticateToken, async (req, res) => {
+        console.log('Fetching orders for:', req.user.email); // Log the email
+        try {
+          const query = {
+            'customer.email': req.user.email,
+            status: { $in: ['processing', 'shipped', 'delivered', 'succeeded','completed','pending'] }
+          };
+          console.log('Query:', query); // Log the query
+      
+          const orders = await ordersCollection
+            .find(query)
+            .sort({ createdAt: -1 }) // Sort by createdAt descending (newest first)
+            .toArray();
+          
+          console.log('Orders found:', orders); // Log the orders
+      
+          res.json(orders);
+        } catch (error) {
+          console.error('Error fetching orders:', error);
+          res.status(500).json({ error: 'Failed to fetch orders' });
+        }
+      });
 
    // Subscribe to Newsletter
    app.post('/subscribe', async (req, res) => {
