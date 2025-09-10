@@ -509,119 +509,129 @@ app.put('/admin/contacts/:id/status', async (req, res) => {
   };
 
   // Stripe Checkout - Support both web and mobile
-    app.post('/create-checkout-session', authenticateToken, async (req, res) => {
-      try {
-        const { totalAmount, items, customer, platform = 'web' } = req.body;
-        
-        if (!totalAmount || totalAmount <= 0) return res.status(400).send({ error: 'Invalid total amount' });
+app.post('/create-checkout-session', authenticateToken, async (req, res) => {
+  try {
+    const { totalAmount, items, customer, platform = 'web' } = req.body;
+    
+    if (!totalAmount || totalAmount <= 0) return res.status(400).send({ error: 'Invalid total amount' });
 
-        if (platform === 'web') {
-          // Web version - Stripe Checkout (your existing code)
-          const session = await stripe.checkout.sessions.create({
-            payment_method_types: ['card'],
-            line_items: items.map((item) => ({
-              price_data: {
-                currency: 'usd',
-                product_data: { 
-                  name: item.name,
-                  images: [item.imageUrl] 
-                },
-                unit_amount: Math.round(item.price * 100),
-              },
-              quantity: item.quantity,
-            })),
-            mode: 'payment',
-            success_url: 'https://mohamedmaamar.me/kronos/#/success',
-            cancel_url: 'https://mohamedmaamar.me/kronos/#/cancel',
-            customer_email: customer.email,
-            metadata: { ...customer },
-          });
-
-          await ordersCollection.insertOne({
-            items,
-            totalAmount,
-            customer,
-            paymentIntentId: session.payment_intent,
-            status: 'Pending',
-            createdAt: new Date(),
-          });
-
-          res.json({ id: session.id });
-
-        } else if (platform === 'mobile') {
-          // Mobile version - Stripe Payment Sheet
-          const customerStripe = await stripe.customers.create({
-            email: customer.email,
-            name: customer.name,
-            metadata: { ...customer }
-          });
-
-          const ephemeralKey = await stripe.ephemeralKeys.create(
-            { customer: customerStripe.id },
-            { apiVersion: '2023-10-16' }
-          );
-
-          const paymentIntent = await stripe.paymentIntents.create({
-            amount: Math.round(totalAmount * 100),
+    if (platform === 'web') {
+      // Web version - Stripe Checkout
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: items.map((item) => ({
+          price_data: {
             currency: 'usd',
-            customer: customerStripe.id,
-            automatic_payment_methods: {
-              enabled: true,
+            product_data: { 
+              name: item.name,
+              images: [item.imageUrl] 
             },
-            metadata: {
-              order_type: 'mobile',
-              customer_name: customer.name,
-              customer_email: customer.email,
-              items: JSON.stringify(items.map(item => ({
-                id: item.id,
-                name: item.name,
-                quantity: item.quantity,
-                price: item.price
-              })))
-            }
-          });
+            unit_amount: Math.round(item.price * 100),
+          },
+          quantity: item.quantity,
+        })),
+        mode: 'payment',
+        success_url: 'https://mohamedmaamar.me/kronos/#/success?session_id={CHECKOUT_SESSION_ID}',
+        cancel_url: 'https://mohamedmaamar.me/kronos/#/cancel',
+        customer_email: customer.email,
+        metadata: {
+          ...customer,
+          items: JSON.stringify(items.map(item => ({
+            id: item.id,
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price
+          })))
+        },
+      });
 
-          // DO NOT save order to database yet
-          res.json({
-            paymentIntent: paymentIntent.client_secret,
-            ephemeralKey: ephemeralKey.secret,
-            customer: customerStripe.id,
-          });
+      // DO NOT save order to database yet
+      res.json({ id: session.id });
 
-        } else {
-          res.status(400).send({ error: 'Invalid platform specified' });
+    } else if (platform === 'mobile') {
+      // Mobile version - Stripe Payment Sheet
+      const customerStripe = await stripe.customers.create({
+        email: customer.email,
+        name: customer.name,
+        metadata: { ...customer }
+      });
+
+      const ephemeralKey = await stripe.ephemeralKeys.create(
+        { customer: customerStripe.id },
+        { apiVersion: '2023-10-16' }
+      );
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(totalAmount * 100),
+        currency: 'usd',
+        customer: customerStripe.id,
+        automatic_payment_methods: {
+          enabled: true,
+        },
+        metadata: {
+          order_type: 'mobile',
+          customer_name: customer.name,
+          customer_email: customer.email,
+          items: JSON.stringify(items.map(item => ({
+            id: item.id,
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price
+          })))
         }
+      });
 
-      } catch (error) {
-        console.error('Checkout error:', error);
-        res.status(500).send({ error: 'Failed to create checkout session' });
-      }
+      res.json({
+        paymentIntent: paymentIntent.client_secret,
+        ephemeralKey: ephemeralKey.secret,
+        customer: customerStripe.id,
+      });
+
+    } else {
+      res.status(400).send({ error: 'Invalid platform specified' });
+    }
+
+  } catch (error) {
+    console.error('Checkout error:', error);
+    res.status(500).send({ error: 'Failed to create checkout session' });
+  }
+});
+
+// Add endpoint to create order after successful payment
+app.post('/create-order', authenticateToken, async (req, res) => {
+  try {
+    const { items, totalAmount, customer, paymentIntentId, platform = 'web' } = req.body;
+    
+    const orderResult = await ordersCollection.insertOne({
+      items,
+      totalAmount,
+      customer,
+      paymentIntentId,
+      status: 'Completed',
+      createdAt: new Date(),
+      platform
     });
 
-    // Add this endpoint to create order after successful payment
-    app.post('/create-order', authenticateToken, async (req, res) => {
-      try {
-        const { items, totalAmount, customer, paymentIntentId } = req.body;
-        
-        const orderResult = await ordersCollection.insertOne({
-          items,
-          totalAmount,
-          customer,
-          paymentIntentId,
-          status: 'Completed',
-          createdAt: new Date(),
-          platform: 'mobile'
-        });
-
-        res.json({
-          orderId: orderResult.insertedId,
-          message: 'Order created successfully'
-        });
-      } catch (error) {
-        console.error('Order creation error:', error);
-        res.status(500).send({ error: 'Failed to create order' });
-      }
+    res.json({
+      orderId: orderResult.insertedId,
+      message: 'Order created successfully'
     });
+  } catch (error) {
+    console.error('Order creation error:', error);
+    res.status(500).send({ error: 'Failed to create order' });
+  }
+});
+
+// Add endpoint to verify payment
+app.get('/verify-payment/:sessionId', authenticateToken, async (req, res) => {
+  try {
+    const session = await stripe.checkout.sessions.retrieve(req.params.sessionId);
+    res.json(session);
+  } catch (error) {
+    console.error('Error retrieving session:', error);
+    res.status(500).send({ error: 'Failed to verify payment' });
+  }
+});
 
   // Get User Orders
   // Fetch Orders for Authenticated User
