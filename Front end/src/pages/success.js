@@ -45,60 +45,62 @@ export const Success = () => {
         const session = await verifyResponse.json();
         
         if (session.payment_status === 'paid') {
-          // 2. Create order in database
-          const orderResponse = await fetch(`${API_URL}/create-order`, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              items: JSON.parse(session.metadata.items || '[]'),
-              totalAmount: session.amount_total / 100,
-              customer: {
-                name: session.metadata.name,
-                email: session.metadata.email,
-                address: session.metadata.address,
-                city: session.metadata.city,
-                postalCode: session.metadata.postalCode,
-                country: session.metadata.country
+          let orderIdFromResponse = null;
+          
+          // 2. Create order in database (or get existing order ID)
+          try {
+            const orderResponse = await fetch(`${API_URL}/create-order`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
               },
-              paymentIntentId: session.payment_intent,
-              platform: 'web'
-            })
-          });
+              body: JSON.stringify({
+                items: JSON.parse(session.metadata.items || '[]'),
+                totalAmount: session.amount_total / 100,
+                customer: {
+                  name: session.metadata.name,
+                  email: session.metadata.email,
+                  address: session.metadata.address,
+                  city: session.metadata.city,
+                  postalCode: session.metadata.postalCode,
+                  country: session.metadata.country
+                },
+                paymentIntentId: session.payment_intent,
+                platform: 'web'
+              })
+            });
 
-          // Handle 409 conflict (order already exists)
-          if (orderResponse.status === 409) {
-            const conflictData = await orderResponse.json();
-            setOrderId(conflictData.orderId);
-            console.log('Order already exists, using existing order ID:', conflictData.orderId);
-          } 
-          // Handle other errors
-          else if (!orderResponse.ok) {
-            throw new Error('Failed to create order');
-          }
-          // Handle success
-          else {
-            const orderData = await orderResponse.json();
-            setOrderId(orderData.orderId);
+            if (orderResponse.ok) {
+              const orderData = await orderResponse.json();
+              orderIdFromResponse = orderData.orderId;
+            } else if (orderResponse.status === 409) {
+              const conflictData = await orderResponse.json();
+              orderIdFromResponse = conflictData.orderId;
+              console.log('Order already exists, using existing order ID:', conflictData.orderId);
+            } else {
+              console.warn('Order creation failed, but payment was successful. Status:', orderResponse.status);
+              // Continue anyway since payment was successful
+            }
+          } catch (orderError) {
+            console.warn('Order creation error, but payment was successful:', orderError);
+            // Continue anyway since payment was successful
           }
           
-          // 3. Clear cart regardless of whether order was just created or already exists
+          // Set order ID if we got one
+          if (orderIdFromResponse) {
+            setOrderId(orderIdFromResponse);
+          }
+          
+          // 3. Clear cart and show success message
           clearCart();
-          
           message.success('Payment successful! Your order has been processed.');
         } else {
           throw new Error('Payment not completed');
         }
       } catch (error) {
         console.error('Error:', error);
-        
-        // Don't show error for 409 conflicts, as they're expected
-        if (!error.message.includes('409')) {
-          message.error('Error processing your order: ' + error.message);
-        }
-        
+        message.error('Error processing your order: ' + error.message);
         navigate('/cart');
       } finally {
         setIsLoading(false);
