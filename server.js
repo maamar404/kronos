@@ -576,7 +576,8 @@ app.post('/create-checkout-session', authenticateToken, async (req, res) => {
             id: item.id,
             name: item.name,
             quantity: item.quantity,
-            price: item.price
+            price: item.price,
+            imageUrl: item.imageUrl
           })))
         }
       });
