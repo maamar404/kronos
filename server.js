@@ -516,37 +516,40 @@ app.post('/create-checkout-session', authenticateToken, async (req, res) => {
     if (!totalAmount || totalAmount <= 0) return res.status(400).send({ error: 'Invalid total amount' });
 
     if (platform === 'web') {
-      // Web version - Stripe Checkout
-      const session = await stripe.checkout.sessions.create({
-        payment_method_types: ['card'],
-        line_items: items.map((item) => ({
-          price_data: {
-            currency: 'usd',
-            product_data: { 
-              name: item.name,
-              images: [item.imageUrl] 
-            },
-            unit_amount: Math.round(item.price * 100),
-          },
-          quantity: item.quantity,
-        })),
-        mode: 'payment',
-        success_url: 'https://mohamedmaamar.me/kronos/#/success?session_id={CHECKOUT_SESSION_ID}',
-        cancel_url: 'https://mohamedmaamar.me/kronos/#/cancel',
-        customer_email: customer.email,
-        metadata: {
-          ...customer,
-          items: JSON.stringify(items.map(item => ({
-            id: item.id,
-            name: item.name,
-            quantity: item.quantity,
-            price: item.price
-          })))
+  // Web version - Stripe Checkout
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    line_items: items.map((item) => ({
+      price_data: {
+        currency: 'usd',
+        product_data: { 
+          name: item.name,
+          images: [item.imageUrl] 
         },
-      });
+        unit_amount: Math.round(item.price * 100),
+      },
+      quantity: item.quantity,
+    })),
+    mode: 'payment',
+    success_url: 'https://mohamedmaamar.me/kronos/#/success?session_id={CHECKOUT_SESSION_ID}',
+    cancel_url: 'https://mohamedmaamar.me/kronos/#/cancel',
+    customer_email: customer.email,
+    metadata: {
+      ...customer,
+      items: JSON.stringify(items.map(item => ({
+        id: item.id,
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price,
+        imageUrl: item.imageUrl, // ← Add this line
+        size: item.size // ← Also add size if needed
+      })))
+    },
+  });
 
-      // DO NOT save order to database yet
-      res.json({ id: session.id });
+  // DO NOT save order to database yet
+  res.json({ id: session.id });
+
 
     } else if (platform === 'mobile') {
       // Mobile version - Stripe Payment Sheet
