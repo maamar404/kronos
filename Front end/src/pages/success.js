@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-
+import { CartContext } from '../contexts/CartContext';
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:4000';
 
 export const Success = () => {
@@ -9,6 +9,7 @@ export const Success = () => {
   const [orderId, setOrderId] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
+  const { clearCart } = React.useContext(CartContext);
 
   useEffect(() => {
     const verifyPaymentAndCreateOrder = async () => {
@@ -69,8 +70,8 @@ export const Success = () => {
           setOrderId(orderData.orderId);
           
           // 3. Clear cart
-          localStorage.removeItem('cartProducts');
-          
+          clearCart();
+
           toast.success('Payment successful! Your order has been created.');
         } else {
           throw new Error('Payment not completed');

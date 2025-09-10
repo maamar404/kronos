@@ -598,25 +598,20 @@ app.post('/create-checkout-session', authenticateToken, async (req, res) => {
 });
 
 // Add detailed logging to your create-order endpoint
+// Add endpoint to create order after successful payment
 app.post('/create-order', authenticateToken, async (req, res) => {
   try {
-    console.log('Received request to create order');
-    console.log('Request body:', req.body);
-    
     const { items, totalAmount, customer, paymentIntentId, platform = 'web' } = req.body;
     
-    // Validate required fields
-    if (!items || !totalAmount || !customer || !paymentIntentId) {
-      console.log('Missing required fields:', {
-        items: !!items,
-        totalAmount: !!totalAmount,
-        customer: !!customer,
-        paymentIntentId: !!paymentIntentId
+    // Check if order with this paymentIntentId already exists
+    const existingOrder = await ordersCollection.findOne({ paymentIntentId });
+    if (existingOrder) {
+      console.log('Order already exists for paymentIntentId:', paymentIntentId);
+      return res.status(409).json({
+        orderId: existingOrder._id,
+        message: 'Order already exists'
       });
-      return res.status(400).send({ error: 'Missing required fields' });
     }
-    
-    console.log('Inserting order into database...');
     
     const orderResult = await ordersCollection.insertOne({
       items,
@@ -628,8 +623,6 @@ app.post('/create-order', authenticateToken, async (req, res) => {
       platform
     });
 
-    console.log('Order inserted successfully:', orderResult.insertedId);
-    
     res.json({
       orderId: orderResult.insertedId,
       message: 'Order created successfully'
