@@ -213,7 +213,7 @@ export const OrderHistory = () => {
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div>
                     <h2 className="text-xl font-bold text-white mb-1">
-                      Order #{order._id.slice(-8).toUpperCase()}
+                      Order #{order._id.toUpperCase()}
                     </h2>
                     <p className="text-gray-300 flex items-center gap-2">
                       <svg className="w-4 h-4 text-[#B8F200]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
